@@ -15,14 +15,14 @@ console.log(JWT_SECRET);
 
 const app = express();
 const server = http.createServer(app);
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "http://localhost:5173", // Your frontend URL
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
-app.use(cors());
+
+const corsOptions = {
+  origin: "http://localhost:5173", // Only allow this origin
+  methods: ["GET", "POST"], // Allowed HTTP methods
+  credentials: true, // Include credentials (cookies, etc.)
+};
+
+app.use(cors(corsOptions)); // Apply CORS middleware for all routes
 app.use(express.json());
 
 // Connect to MongoDB
@@ -36,6 +36,14 @@ app.use("/api", messageRoutes);
 const onlineUsers = new Set();
 
 // Socket.IO Connection
+const io = socketIo(server, {
+  cors: {
+    origin: "http://localhost:5173", // Allow only this origin
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
 
@@ -44,7 +52,7 @@ io.use((socket, next) => {
     socket.userId = decoded.userId;
     next();
   } catch (error) {
-    next(new Error("Authentication error" + error));
+    next(new Error("Authentication error: " + error.message));
   }
 });
 
