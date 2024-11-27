@@ -15,10 +15,11 @@ console.log(JWT_SECRET);
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
+const io = require("socket.io")(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5173/"],
+    origin: "http://localhost:5173", // Your frontend URL
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 app.use(cors());
